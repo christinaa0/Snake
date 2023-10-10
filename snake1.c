@@ -14,7 +14,7 @@
 // Codes de direction
 #define UP 'w'
 #define DOWN 's'
-#define LEFT 'a'
+#define LEFT 'b'
 #define RIGHT 'd'
 
 // Structures de données pour le serpent et la nourriture
