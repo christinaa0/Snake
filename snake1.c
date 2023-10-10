@@ -12,7 +12,7 @@
 #define MAX_LENGTH 100
 
 // Codes de direction
-#define UP 'w'
+#define UP 'e'
 #define DOWN 's'
 #define LEFT 'a'
 #define RIGHT 'd'
