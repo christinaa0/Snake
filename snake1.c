@@ -1,7 +1,6 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
+#include <stdbool.h>#include <time.h>
 #include <unistd.h>  // Pour la fonction sleep
 
 // Taille de la grille
@@ -12,7 +11,7 @@
 #define MAX_LENGTH 100
 
 // Codes de direction
-#define UP 'w'
+#define UP 'n
 #define DOWN 's'
 #define LEFT 'a'
 #define RIGHT 'd'
