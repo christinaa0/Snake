@@ -12,6 +12,13 @@
 #define DOWN 80
 #define LEFT 75
 #define RIGHT 77
+#define SLOW_SPEED 6000000
+#define FAST_SPEED 1000000
+#define FAST 61   // La valeur 16 correspond à la touche Shift
+#define SLOW  41 // Vous pouvez choisir une autre valeur pour la touche Espace si nécessaire
+
+
+long double currentSpeed = FAST_SPEED; // Initialisez à la vitesse rapide par défaut
 
 int length;
 int bend_no;
@@ -20,7 +27,7 @@ char key;
 void record();
 void load();
 int life;
-void Delay(long double);
+void Delay(long double k);
 void Move();
 void Food();
 int Score();
@@ -45,7 +52,7 @@ struct coordinate
 
 typedef  struct coordinate coordinate;
 
-coordinate head, bend[500],food,body[30];
+coordinate head, bend[500],food[3],body[30];
 
 int main()
 {
@@ -82,118 +89,79 @@ int main()
 
 void Move()
 {
-    int a,i;
+    int a, i;
 
     do
     {
-
         Food();
         fflush(stdin);
 
-        len=0;
+        len = 0;
 
-        for(i=0; i<30; i++)
-
+        for (i = 0; i < 30; i++)
         {
+            body[i].x = 0;
+            body[i].y = 0;
 
-            body[i].x=0;
-
-            body[i].y=0;
-
-            if(i==length)
-
+            if (i == length)
                 break;
-
         }
 
         Delay(length);
-
         Boarder();
 
-        if(head.direction==RIGHT)
-
+        if (head.direction == RIGHT)
             Right();
-
-        else if(head.direction==LEFT)
-
+        else if (head.direction == LEFT)
             Left();
-
-        else if(head.direction==DOWN)
-
+        else if (head.direction == DOWN)
             Down();
-
-        else if(head.direction==UP)
-
+        else if (head.direction == UP)
             Up();
 
         ExitGame();
 
-    }
-    while(!kbhit());
+    } while (!kbhit());
 
-    a=getch();
+    a = getch();
 
-    if(a==27)
-
+    if (a == 27)
     {
-
         system("cls");
-
         exit(0);
-
     }
-    key=getch();
 
-    if((key==RIGHT&&head.direction!=LEFT&&head.direction!=RIGHT)||(key==LEFT&&head.direction!=RIGHT&&head.direction!=LEFT)||(key==UP&&head.direction!=DOWN&&head.direction!=UP)||(key==DOWN&&head.direction!=UP&&head.direction!=DOWN))
+    key = getch();
 
+    if ((key == RIGHT && head.direction != LEFT && head.direction != RIGHT) || (key == LEFT && head.direction != RIGHT && head.direction != LEFT) || (key == UP && head.direction != DOWN && head.direction != UP) || (key == DOWN && head.direction != UP && head.direction != DOWN))
     {
-
         bend_no++;
+        bend[bend_no] = head;
+        head.direction = key;
 
-        bend[bend_no]=head;
-
-        head.direction=key;
-
-        if(key==UP)
-
+        if (key == UP)
             head.y--;
-
-        if(key==DOWN)
-
+        if (key == DOWN)
             head.y++;
-
-        if(key==RIGHT)
-
+        if (key == RIGHT)
             head.x++;
-
-        if(key==LEFT)
-
+        if (key == LEFT)
             head.x--;
 
         Move();
-
     }
-
-    else if(key==27)
-
+    else if (key == 27)
     {
-
         system("cls");
-
         exit(0);
-
     }
-
     else
-
     {
-
         printf("\a");
-
         Move();
-
     }
 }
+
 
 void gotoxy(int x, int y)
 {
@@ -250,12 +218,25 @@ void Down()
     if(!kbhit())
         head.y++;
 }
+
+
 void Delay(long double k)
 {
     Score();
     long double i;
-    for(i=0; i<=(10000000); i++);
+
+    if (_kbhit()) {
+        char ch = getch();
+        if (ch == SLOW) {
+            currentSpeed = SLOW_SPEED; // Ralentir avec la touche Espace (SLOW)
+        } else if (ch == FAST) {
+            currentSpeed = FAST_SPEED; // Accélérer avec la touche Shift (FAST)
+        }
+    }
+
+    for(i = 0; i <= currentSpeed; i++);
 }
+
 void ExitGame()
 {
     int i,check=0;
@@ -288,32 +269,40 @@ void ExitGame()
         }
     }
 }
+int applesEaten = 0;  // Déclaration de la variable globale pour suivre les pommes mangées
+
 void Food()
 {
-    if(head.x==food.x&&head.y==food.y)
-    {
-        length++;
-        time_t a;
-        a=time(0);
-        srand(a);
-        food.x=rand()%70;
-        if(food.x<=10)
-            food.x+=11;
-        food.y=rand()%30;
-        if(food.y<=10)
-
-            food.y+=11;
-    }
-    else if(food.x==0)/*to create food for the first time coz global variable are initialized with 0*/
-    {
-        food.x=rand()%70;
-        if(food.x<=10)
-            food.x+=11;
-        food.y=rand()%30;
-        if(food.y<=10)
-            food.y+=11;
+    int i;
+    for (i = 0; i < 3; i++) {
+        if (head.x == food[i].x && head.y == food[i].y) {
+            applesEaten++;  // Augmente le compteur de pommes mangées
+            if (applesEaten == 3) {
+                length++;  // Fait grossir le serpent après 3 pommes mangées
+                applesEaten = 0;  // Réinitialise le compteur
+            }
+            // Génération de nouvelles coordonnées pour la pomme
+            time_t a;
+            a = time(0);
+            srand(a);
+            food[i].x = rand() % 70;
+            if (food[i].x <= 10)
+                food[i].x += 11;
+            food[i].y = rand() % 30;
+            if (food[i].y <= 10)
+                food[i].y += 11;
+        } else if (food[i].x == 0) {
+            // Génération de nouvelles coordonnées pour la pomme au démarrage
+            food[i].x = rand() % 70;
+            if (food[i].x <= 10)
+                food[i].x += 11;
+            food[i].y = rand() % 30;
+            if (food[i].y <= 10)
+                food[i].y += 11;
+        }
     }
 }
+
 void Left()
 {
     int i;
@@ -427,8 +416,11 @@ void Boarder()
 {
     system("cls");
     int i;
-    GotoXY(food.x,food.y);   /*displaying food*/
-    printf("F");
+    for(i=0; i<3; i++)
+    {
+    GotoXY(food[i].x,food[i].y);   /*displaying food*/
+    printf("O");
+}
     for(i=10; i<71; i++)
     {
         GotoXY(i,10);
@@ -516,6 +508,7 @@ int Score()
     score=length-5;
     GotoXY(50,8);
     printf("Life : %d",life);
+
     return score;
 }
 int Scoreonly()
