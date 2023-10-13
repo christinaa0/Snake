@@ -1,0 +1,12 @@
+Player Name :JI
+Played Date:Thu Oct 12 22:28:36 2023
+Score:0
+___________________________________________________
+Player Name :Camara
+Played Date:Thu Oct 12 22:30:18 2023
+Score:0
+___________________________________________________
+Player Name :Camara
+Played Date:Thu Oct 12 22:31:01 2023
+Score:1
+___________________________________________________
