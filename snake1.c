@@ -36,6 +36,7 @@ void Right();
 void ExitGame();
 int Scoreonly();
 
+
 struct coordinate
 {
     int x;
@@ -45,11 +46,12 @@ struct coordinate
 
 typedef  struct coordinate coordinate;
 
-coordinate head, bend[500],food,body[30];
+coordinate head, bend[500],food[3],body[30];
+int isGameLoaded = 0;
+
 
 int main()
 {
-
     char key;
 
     Print();
@@ -74,11 +76,18 @@ int main()
 
     bend[0]=head;
 
-    Move();   //initialing initial bend coordinate
+    while(1) {
+        Move();
+        if (isGameLoaded) {
+            isGameLoaded = 0;  // reset the flag
+            continue;  // skip the rest of the loop and start over
+        }
+        break;  // exit the loop if the game is not loaded
+    }
 
     return 0;
-
 }
+
 
 void Move()
 {
@@ -131,17 +140,26 @@ void Move()
     }
     while(!kbhit());
 
-    a=getch();
 
-    if(a==27)
 
-    {
+    a = getch();
 
-        system("cls");
+if(a == 's' || a == 'S') {
+    saveGame();
+    return;
+}
 
-        exit(0);
+if(a == 'l' || a == 'L') {
+    loadGame();
+    return;
+}
 
-    }
+if (a == 27) {
+    system("cls");
+    exit(0);
+}
+
+
     key=getch();
 
     if((key==RIGHT&&head.direction!=LEFT&&head.direction!=RIGHT)||(key==LEFT&&head.direction!=RIGHT&&head.direction!=LEFT)||(key==UP&&head.direction!=DOWN&&head.direction!=UP)||(key==DOWN&&head.direction!=UP&&head.direction!=DOWN))
@@ -250,6 +268,8 @@ void Down()
     if(!kbhit())
         head.y++;
 }
+
+
 void Delay(long double k)
 {
     Score();
@@ -288,32 +308,41 @@ void ExitGame()
         }
     }
 }
+int applesEaten = 0;  // Déclaration de la variable globale pour suivre les pommes mangées
+
 void Food()
 {
-    if(head.x==food.x&&head.y==food.y)
-    {
-        length++;
-        time_t a;
-        a=time(0);
-        srand(a);
-        food.x=rand()%70;
-        if(food.x<=10)
-            food.x+=11;
-        food.y=rand()%30;
-        if(food.y<=10)
-
-            food.y+=11;
-    }
-    else if(food.x==0)/*to create food for the first time coz global variable are initialized with 0*/
-    {
-        food.x=rand()%70;
-        if(food.x<=10)
-            food.x+=11;
-        food.y=rand()%30;
-        if(food.y<=10)
-            food.y+=11;
+    int i;
+    for (i = 0; i < 3; i++) {
+        if (head.x == food[i].x && head.y == food[i].y) {
+            applesEaten++;  // Augmente le compteur de pommes mangées
+            if (applesEaten == 3) {
+                length++;  // Fait grossir le serpent après 3 pommes mangées
+                applesEaten = 0;  // Réinitialise le compteur
+            }
+            // Génération de nouvelles coordonnées pour la pomme
+            time_t a;
+            a = time(0);
+            srand(a);
+            food[i].x = rand() % 70;
+            if (food[i].x <= 10)
+                food[i].x += 11;
+            food[i].y = rand() % 30;
+            if (food[i].y <= 10)
+                food[i].y += 11;
+        } else if (food[i].x == 0) {
+            // Génération de nouvelles coordonnées pour la pomme au démarrage
+            food[i].x = rand() % 70;
+            if (food[i].x <= 10)
+                food[i].x += 11;
+            food[i].y = rand() % 30;
+            if (food[i].y <= 10)
+                food[i].y += 11;
+        }
     }
 }
+
+
 void Left()
 {
     int i;
@@ -427,8 +456,11 @@ void Boarder()
 {
     system("cls");
     int i;
-    GotoXY(food.x,food.y);   /*displaying food*/
-    printf("F");
+    for(i=0; i<3; i++)
+    {
+    GotoXY(food[i].x,food[i].y);   /*displaying food*/
+    printf("O");
+}
     for(i=10; i<71; i++)
     {
         GotoXY(i,10);
@@ -516,6 +548,7 @@ int Score()
     score=length-5;
     GotoXY(50,8);
     printf("Life : %d",life);
+
     return score;
 }
 int Scoreonly()
@@ -524,6 +557,48 @@ int Scoreonly()
     system("cls");
     return score;
 }
+
+
+
+
+void saveGame() {
+    FILE *file = fopen("snake_save.txt", "w");
+    if (file) {
+        fprintf(file, "%d %d %d\n", head.x, head.y, head.direction);
+        fprintf(file, "%d\n", length);
+        for (int i = 0; i < length; i++) {
+            fprintf(file, "%d %d\n", body[i].x, body[i].y);
+        }
+        for (int i = 0; i < 3; i++) {
+            fprintf(file, "%d %d\n", food[i].x, food[i].y);
+        }
+        fprintf(file, "%d\n", life);
+        fclose(file);
+    }
+}
+
+void loadGame() {
+    FILE *file = fopen("snake_save.txt", "r");
+    if (file) {
+        fscanf(file, "%d %d %d", &head.x, &head.y, &head.direction);
+        fscanf(file, "%d", &length);
+        for (int i = 0; i < length; i++) {
+            fscanf(file, "%d %d", &body[i].x, &body[i].y);
+        }
+        for (int i = 0; i < 3; i++) {
+            fscanf(file, "%d %d", &food[i].x, &food[i].y);
+        }
+        fscanf(file, "%d", &life);
+        fclose(file);
+    }
+    isGameLoaded = 1;
+}
+
+
+
+
+
+
 void Up()
 {
     int i;
