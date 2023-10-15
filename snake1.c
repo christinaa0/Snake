@@ -35,27 +35,6 @@ void Up();
 void Right();
 void ExitGame();
 int Scoreonly();
-int gameSpeed;
-int SelectGameSpeed() {
-    int speedChoice;
-    printf("Choisissez la vitesse du jeu :\n");
-    printf("1. Normale\n");
-    printf("2. Rapide\n");
-    scanf("%d", &speedChoice);
-
-    if (speedChoice == 1) {
-        return 100;  // Vitesse normale
-    } else if (speedChoice == 2) {
-        return 50;   // Vitesse rapide
-    } else {
-        printf("Choix invalide. La vitesse normale a été sélectionnée par défaut.\n");
-        return 100;  // Vitesse par défaut
-    }
-}
-gameSpeed = SelectGameSpeed();  // Appeler la fonction pour obtenir la vitesse du jeu
-printf("Vitesse du jeu sélectionnée : %d\n", gameSpeed);  // Afficher la vitesse sélectionnée
-
- // Déclaration de la variable globale pour la vitesse du jeu
 
 
 struct coordinate
@@ -90,8 +69,6 @@ int main()
     head.direction=RIGHT;
 
     Boarder();
-
-    gameSpeed = SelectGameSpeed();
 
     Food(); //to generate food coordinates initially
 
@@ -138,7 +115,7 @@ void Move()
 
         }
 
-        Delay(gameSpeed);
+        Delay(length);
 
         Boarder();
 
