@@ -1,4 +1,4 @@
-#include <stdio.h>
+Ôªø#include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include <conio.h>
@@ -12,13 +12,6 @@
 #define DOWN 80
 #define LEFT 75
 #define RIGHT 77
-#define SLOW_SPEED 6000000
-#define FAST_SPEED 1000000
-#define FAST 61   // La valeur 16 correspond ‡ la touche Shift
-#define SLOW  41 // Vous pouvez choisir une autre valeur pour la touche Espace si nÈcessaire
-
-
-long double currentSpeed = FAST_SPEED; // Initialisez ‡ la vitesse rapide par dÈfaut
 
 int length;
 int bend_no;
@@ -27,7 +20,7 @@ char key;
 void record();
 void load();
 int life;
-void Delay(long double k);
+void Delay(long double);
 void Move();
 void Food();
 int Score();
@@ -42,6 +35,28 @@ void Up();
 void Right();
 void ExitGame();
 int Scoreonly();
+int gameSpeed;
+int SelectGameSpeed() {
+    int speedChoice;
+    printf("Choisissez la vitesse du jeu :\n");
+    printf("1. Normale\n");
+    printf("2. Rapide\n");
+    scanf("%d", &speedChoice);
+
+    if (speedChoice == 1) {
+        return 100;  // Vitesse normale
+    } else if (speedChoice == 2) {
+        return 50;   // Vitesse rapide
+    } else {
+        printf("Choix invalide. La vitesse normale a √©t√© s√©lectionn√©e par d√©faut.\n");
+        return 100;  // Vitesse par d√©faut
+    }
+}
+gameSpeed = SelectGameSpeed();  // Appeler la fonction pour obtenir la vitesse du jeu
+printf("Vitesse du jeu s√©lectionn√©e : %d\n", gameSpeed);  // Afficher la vitesse s√©lectionn√©e
+
+ // D√©claration de la variable globale pour la vitesse du jeu
+
 
 struct coordinate
 {
@@ -53,10 +68,11 @@ struct coordinate
 typedef  struct coordinate coordinate;
 
 coordinate head, bend[500],food[3],body[30];
+int isGameLoaded = 0;
+
 
 int main()
 {
-
     char key;
 
     Print();
@@ -75,93 +91,150 @@ int main()
 
     Boarder();
 
+    gameSpeed = SelectGameSpeed();
+
     Food(); //to generate food coordinates initially
 
     life=3; //number of extra lives
 
     bend[0]=head;
 
-    Move();   //initialing initial bend coordinate
+    while(1) {
+        Move();
+        if (isGameLoaded) {
+            isGameLoaded = 0;  // reset the flag
+            continue;  // skip the rest of the loop and start over
+        }
+        break;  // exit the loop if the game is not loaded
+    }
 
     return 0;
-
 }
+
 
 void Move()
 {
-    int a, i;
+    int a,i;
 
     do
     {
+
         Food();
         fflush(stdin);
 
-        len = 0;
+        len=0;
 
-        for (i = 0; i < 30; i++)
+        for(i=0; i<30; i++)
+
         {
-            body[i].x = 0;
-            body[i].y = 0;
 
-            if (i == length)
+            body[i].x=0;
+
+            body[i].y=0;
+
+            if(i==length)
+
                 break;
+
         }
 
-        Delay(length);
+        Delay(gameSpeed);
+
         Boarder();
 
-        if (head.direction == RIGHT)
+        if(head.direction==RIGHT)
+
             Right();
-        else if (head.direction == LEFT)
+
+        else if(head.direction==LEFT)
+
             Left();
-        else if (head.direction == DOWN)
+
+        else if(head.direction==DOWN)
+
             Down();
-        else if (head.direction == UP)
+
+        else if(head.direction==UP)
+
             Up();
 
         ExitGame();
 
-    } while (!kbhit());
+    }
+    while(!kbhit());
+
+
 
     a = getch();
 
-    if (a == 27)
-    {
-        system("cls");
-        exit(0);
-    }
+if(a == 's' || a == 'S') {
+    saveGame();
+    return;
+}
 
-    key = getch();
+if(a == 'l' || a == 'L') {
+    loadGame();
+    return;
+}
 
-    if ((key == RIGHT && head.direction != LEFT && head.direction != RIGHT) || (key == LEFT && head.direction != RIGHT && head.direction != LEFT) || (key == UP && head.direction != DOWN && head.direction != UP) || (key == DOWN && head.direction != UP && head.direction != DOWN))
+if (a == 27) {
+    system("cls");
+    exit(0);
+}
+
+
+    key=getch();
+
+    if((key==RIGHT&&head.direction!=LEFT&&head.direction!=RIGHT)||(key==LEFT&&head.direction!=RIGHT&&head.direction!=LEFT)||(key==UP&&head.direction!=DOWN&&head.direction!=UP)||(key==DOWN&&head.direction!=UP&&head.direction!=DOWN))
+
     {
+
         bend_no++;
-        bend[bend_no] = head;
-        head.direction = key;
 
-        if (key == UP)
+        bend[bend_no]=head;
+
+        head.direction=key;
+
+        if(key==UP)
+
             head.y--;
-        if (key == DOWN)
+
+        if(key==DOWN)
+
             head.y++;
-        if (key == RIGHT)
+
+        if(key==RIGHT)
+
             head.x++;
-        if (key == LEFT)
+
+        if(key==LEFT)
+
             head.x--;
 
         Move();
+
     }
-    else if (key == 27)
+
+    else if(key==27)
+
     {
+
         system("cls");
+
         exit(0);
+
     }
+
     else
+
     {
+
         printf("\a");
+
         Move();
+
     }
 }
-
 
 void gotoxy(int x, int y)
 {
@@ -224,19 +297,8 @@ void Delay(long double k)
 {
     Score();
     long double i;
-
-    if (_kbhit()) {
-        char ch = getch();
-        if (ch == SLOW) {
-            currentSpeed = SLOW_SPEED; // Ralentir avec la touche Espace (SLOW)
-        } else if (ch == FAST) {
-            currentSpeed = FAST_SPEED; // AccÈlÈrer avec la touche Shift (FAST)
-        }
-    }
-
-    for(i = 0; i <= currentSpeed; i++);
+    for(i=0; i<=(10000000); i++);
 }
-
 void ExitGame()
 {
     int i,check=0;
@@ -269,19 +331,19 @@ void ExitGame()
         }
     }
 }
-int applesEaten = 0;  // DÈclaration de la variable globale pour suivre les pommes mangÈes
+int applesEaten = 0;  // D√©claration de la variable globale pour suivre les pommes mang√©es
 
 void Food()
 {
     int i;
     for (i = 0; i < 3; i++) {
         if (head.x == food[i].x && head.y == food[i].y) {
-            applesEaten++;  // Augmente le compteur de pommes mangÈes
+            applesEaten++;  // Augmente le compteur de pommes mang√©es
             if (applesEaten == 3) {
-                length++;  // Fait grossir le serpent aprËs 3 pommes mangÈes
-                applesEaten = 0;  // RÈinitialise le compteur
+                length++;  // Fait grossir le serpent apr√®s 3 pommes mang√©es
+                applesEaten = 0;  // R√©initialise le compteur
             }
-            // GÈnÈration de nouvelles coordonnÈes pour la pomme
+            // G√©n√©ration de nouvelles coordonn√©es pour la pomme
             time_t a;
             a = time(0);
             srand(a);
@@ -292,7 +354,7 @@ void Food()
             if (food[i].y <= 10)
                 food[i].y += 11;
         } else if (food[i].x == 0) {
-            // GÈnÈration de nouvelles coordonnÈes pour la pomme au dÈmarrage
+            // G√©n√©ration de nouvelles coordonn√©es pour la pomme au d√©marrage
             food[i].x = rand() % 70;
             if (food[i].x <= 10)
                 food[i].x += 11;
@@ -302,6 +364,7 @@ void Food()
         }
     }
 }
+
 
 void Left()
 {
@@ -517,6 +580,48 @@ int Scoreonly()
     system("cls");
     return score;
 }
+
+
+
+
+void saveGame() {
+    FILE *file = fopen("snake_save.txt", "w");
+    if (file) {
+        fprintf(file, "%d %d %d\n", head.x, head.y, head.direction);
+        fprintf(file, "%d\n", length);
+        for (int i = 0; i < length; i++) {
+            fprintf(file, "%d %d\n", body[i].x, body[i].y);
+        }
+        for (int i = 0; i < 3; i++) {
+            fprintf(file, "%d %d\n", food[i].x, food[i].y);
+        }
+        fprintf(file, "%d\n", life);
+        fclose(file);
+    }
+}
+
+void loadGame() {
+    FILE *file = fopen("snake_save.txt", "r");
+    if (file) {
+        fscanf(file, "%d %d %d", &head.x, &head.y, &head.direction);
+        fscanf(file, "%d", &length);
+        for (int i = 0; i < length; i++) {
+            fscanf(file, "%d %d", &body[i].x, &body[i].y);
+        }
+        for (int i = 0; i < 3; i++) {
+            fscanf(file, "%d %d", &food[i].x, &food[i].y);
+        }
+        fscanf(file, "%d", &life);
+        fclose(file);
+    }
+    isGameLoaded = 1;
+}
+
+
+
+
+
+
 void Up()
 {
     int i;
