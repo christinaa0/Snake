@@ -1,18 +1,8 @@
-<html>
-<head>
-    <style>
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+#Snake
+This is a Snake game in C for the command line. What's special about this game is that the snake grows after eating 3 apples, and you can save the game, pause during a session, and resume the game at a later time with the same score as after the pause."
 
-        .animated {
-            animation: pulse 2s infinite;
-        }
-    </style>
-</head>
-<body>
-    <p class="animated">README Animé</p>
-</body>
-</html>
+
+
+
+
+
