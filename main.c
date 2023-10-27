@@ -36,6 +36,7 @@ void Right();
 void ExitGame();
 int Scoreonly();
 
+
 struct coordinate
 {
     int x;
@@ -51,41 +52,55 @@ int isGameLoaded = 0;
 
 int main()
 {
-    char key;
-
     Print();
 
     system("cls");
 
-    load();
+    length = 5;
 
-    length=5;
-
-    head.x=25;
-
-    head.y=20;
-
-    head.direction=RIGHT;
+    head.x = 25;
+    head.y = 20;
+    head.direction = RIGHT;
 
     Boarder();
+    Food(); // pour générer des coordonnées de nourriture initiales
+    life = 3; // nombre de vies supplémentaires
+    bend[0] = head;
 
-    Food(); //to generate food coordinates initially
-
-    life=3; //number of extra lives
-
-    bend[0]=head;
-
-    while(1) {
+    while (1) {
         Move();
         if (isGameLoaded) {
-            isGameLoaded = 0;  // reset the flag
-            continue;  // skip the rest of the loop and start over
+            isGameLoaded = 0;  // réinitialiser le drapeau
+            continue;  // sauter le reste de la boucle et recommencer
         }
-        break;  // exit the loop if the game is not loaded
+        break;  // quitter la boucle si le jeu n'est pas chargé
+    }
+
+    int option;
+    char saveFileName[100];
+
+    while (1) {
+        printf("Menu:\n");
+        printf("1. Sauvegarder le jeu\n");
+        printf("2. Charger le jeu\n");
+        printf("3. Quitter\n");
+        printf("Choisissez une option : ");
+        scanf("%d", &option);
+
+        if (option == 1) {
+            saveGame();
+        } else if (option == 2) {
+            loadGame();
+        } else if (option == 3) {
+            break;
+        } else {
+            printf("Option invalide. Réessayez.\n");
+        }
     }
 
     return 0;
 }
+
 
 
 void Move()
@@ -134,7 +149,7 @@ void Move()
 
             Up();
 
-        ExitGame()
+        ExitGame();
 
     }
     while(!kbhit());
@@ -307,37 +322,41 @@ void ExitGame()
         }
     }
 }
+int applesEaten = 0;  // Déclaration de la variable globale pour suivre les pommes mangées
+
 void Food()
 {
-	int i;
-	for(i=0; i<3; i++){
-
-    if(head.x==food[i].x && head.y == food[i].y)
-    {
-        length++;
-        time_t a;
-        a=time(0);
-        srand(a);
-        food[i].x=rand()%70;
-        if(food[i].x<=10)
-            food[i].x+=11;
-        food[i].y=rand()%30;
-        if(food[i].y<=10)
-
-            food[i].y+=11;
-    }
-    else if(food[i].x==0)/*to create food for the first time coz global variable are initialized with 0*/
-    {
-        food[i].x=rand()%70;
-        if(food[i].x<=10)
-            food[i].x+=11;
-        food[i].y=rand()%30;
-        if(food[i].y<=10)
-            food[i].y+=11;
+    int i;
+    for (i = 0; i < 3; i++) {
+        if (head.x == food[i].x && head.y == food[i].y) {
+            applesEaten++;  // Augmente le compteur de pommes mangées
+            if (applesEaten == 3) {
+                length++;  // Fait grossir le serpent après 3 pommes mangées
+                applesEaten = 0;  // Réinitialise le compteur
+            }
+            // Génération de nouvelles coordonnées pour la pomme
+            time_t a;
+            a = time(0);
+            srand(a);
+            food[i].x = rand() % 70;
+            if (food[i].x <= 10)
+                food[i].x += 11;
+            food[i].y = rand() % 30;
+            if (food[i].y <= 10)
+                food[i].y += 11;
+        } else if (food[i].x == 0) {
+            // Génération de nouvelles coordonnées pour la pomme au démarrage
+            food[i].x = rand() % 70;
+            if (food[i].x <= 10)
+                food[i].x += 11;
+            food[i].y = rand() % 30;
+            if (food[i].y <= 10)
+                food[i].y += 11;
+        }
     }
 }
 
-}
+
 void Left()
 {
     int i;
@@ -557,7 +576,10 @@ int Scoreonly()
 
 
 void saveGame() {
-    FILE *file = fopen("snake_save.txt", "w");
+    char fileName[100];
+    printf("Entrez le nom du fichier de sauvegarde : ");
+    scanf("%s", fileName);
+    FILE *file = fopen(fileName, "w");
     if (file) {
         fprintf(file, "%d %d %d\n", head.x, head.y, head.direction);
         fprintf(file, "%d\n", length);
@@ -569,11 +591,17 @@ void saveGame() {
         }
         fprintf(file, "%d\n", life);
         fclose(file);
+        printf("Jeu sauvegardé avec succès dans le fichier : %s\n", fileName);
+    } else {
+        printf("Erreur lors de la sauvegarde du jeu dans le fichier : %s\n", fileName);
     }
 }
 
 void loadGame() {
-    FILE *file = fopen("snake_save.txt", "r");
+    char fileName[100];
+    printf("Entrez le nom du fichier de chargement : ");
+    scanf("%s", fileName);
+    FILE *file = fopen(fileName, "r");
     if (file) {
         fscanf(file, "%d %d %d", &head.x, &head.y, &head.direction);
         fscanf(file, "%d", &length);
@@ -585,9 +613,13 @@ void loadGame() {
         }
         fscanf(file, "%d", &life);
         fclose(file);
+        printf("Jeu chargé avec succès depuis le fichier : %s\n", fileName);
+    } else {
+        printf("Erreur lors du chargement du jeu depuis le fichier : %s\n", fileName);
     }
     isGameLoaded = 1;
 }
+
 
 
 
